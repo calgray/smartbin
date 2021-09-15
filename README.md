@@ -5,19 +5,27 @@ SmartBin is an IoT ultrasonic low-power monitoring solution for waste disposal.
 
 ## Build
 
-Install PlatformIO or PlatformIO VSCode integration.
+Install PlatformIO and/or PlatformIO VSCode integration.
+
+`pip install platformio`
 
 in the project directory run:
 
-`platformio build -e ttgo-tbeam`
+`platformio run build -e ttgo-tbeam`
 
 ## Continuous Integration
 
-Use github actions
+Use github actions, read tests/README
 
 ### Tests
 
-Tests can be run from
+Tests can be run using command:
+
+`platformio test -e ttgo-tbeam`
+
+Tests compatible with the native machine can be run using:
+
+`platformio test -e native`
 
 ### C/C++ Linters
 
