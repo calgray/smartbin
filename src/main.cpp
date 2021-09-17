@@ -37,15 +37,6 @@ void loop()
 
 }
 
-#elif ESP_IDF
-
-// Uses CMake for project configuration
-
-extern "C" void app_main()
-{
-
-}
-
 #else
 
 int main(int argc, char** argv)
