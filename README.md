@@ -11,7 +11,7 @@ Install PlatformIO and/or PlatformIO VSCode integration.
 
 in the project directory run:
 
-`platformio run build -e ttgo-tbeam`
+`platformio run -e ttgo-tbeam`
 
 ## Continuous Integration
 
