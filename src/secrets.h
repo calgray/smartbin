@@ -1,14 +1,23 @@
 
 #pragma once
 
-//unifi
-#define WIFI_SSID "unifi"
-#define EAP_ID "21341958"
-#define EAP_USERNAME "21341958"
-#define EAP_PASSWORD ""
+#define WIFI_SSID ""
+#define WIFI_PWD "" 
 
-//eduroam
+//unifi
+//#define WIFI_SSID ""
+//#define EAP_ID ""
+//#define EAP_USERNAME ""
+//#define EAP_PASSWORD ""
+
+// eduroam
 // #define WIFI_SSID "eduroam"
-// #define EAP_ID "21341958@student.uwa.edu.au"
-// #define EAP_USERNAME "21341958@student.uwa.edu.au"
+// #define EAP_ID ""
+// #define EAP_USERNAME ""
 // #define EAP_PASSWORD ""
+
+IPAddress host_ip(0,0,0,0);
+int port = 0;
+char dbname[] = "";
+char usr[] = "";
+char pwd[] = "";
