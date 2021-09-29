@@ -4,6 +4,10 @@ class Neo6M
 {
     TinyGPSPlus _gps;
 public:
+    /**
+     * @brief Construct a new Neo-6M object
+     * AXP192_LDO3 must be enabled if axp not provided
+     */
     Neo6M();
     ~Neo6M();
 
@@ -15,5 +19,5 @@ public:
      */
     const TinyGPSPlus& read();
 
-    const TinyGPSPlus& get();
+    const TinyGPSPlus& get() const;
 };

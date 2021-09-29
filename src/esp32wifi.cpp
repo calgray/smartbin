@@ -3,12 +3,20 @@
 #include "esp_wpa2.h"
 #include <WiFi.h>
 
-Esp32WiFi::Esp32WiFi(char* ssid, char* password)
+Esp32WiFi::Esp32WiFi(const char* ssid, const char* password)
 {
     WiFi.begin(ssid, password);
+    Serial.println("Connecting");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println();
+    Serial.print("Connected, IP address: ");
+    Serial.println(WiFi.localIP());
 }
 
-Esp32WiFi::Esp32WiFi(char* ssid, char* username, char* password)
+Esp32WiFi::Esp32WiFi(const char* ssid, const char* username, const char* password)
 {
     WiFi.disconnect(true);
     WiFi.mode(WIFI_STA);
@@ -23,4 +31,9 @@ Esp32WiFi::Esp32WiFi(char* ssid, char* username, char* password)
 Esp32WiFi::~Esp32WiFi()
 {
     WiFi.disconnect(true);
+}
+
+Client& Esp32WiFi::get_client()
+{
+    return (Client&)_client;
 }

@@ -1,8 +1,11 @@
-
+#include <WiFi.h>
 
 class Esp32WiFi
 {
-    Esp32WiFi(char* ssid, char* password);
-    Esp32WiFi(char* ssid, char* username, char* password);
+    WiFiClient _client;
+public:
+    Esp32WiFi(const char* ssid, const char* password);
+    Esp32WiFi(const char* ssid, const char* username, const char* password);
     ~Esp32WiFi();
+    Client& get_client();
 };

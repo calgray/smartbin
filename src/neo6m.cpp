@@ -10,6 +10,11 @@ Neo6M::Neo6M()
     Serial2.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX); // GPS Module
 }
 
+Neo6M::~Neo6M()
+{
+    Serial2.end();
+}
+
 const TinyGPSPlus& Neo6M::read()
 {
     while(Serial2.available() > 0)
@@ -22,12 +27,7 @@ const TinyGPSPlus& Neo6M::read()
     return _gps;
 }
 
-const TinyGPSPlus& Neo6M::get()
+const TinyGPSPlus& Neo6M::get() const
 {
     return _gps;
-}
-
-Neo6M::~Neo6M()
-{
-    Serial2.end();
 }
