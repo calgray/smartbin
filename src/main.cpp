@@ -38,15 +38,16 @@ void setup()
     Serial.begin(115200); // USB Monitor
     Axp192 axp;
 
-    Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
-    Neo6M gps;
-
+    // MVP
     TrafficLight traffic;
     HCSR04 ultrasonic;
     double distance = ultrasonic.get_distance_m();
     traffic.set_max_distance(2.0);
     traffic.set_distance(distance);
 
+    // IoT
+    Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
+    Neo6M gps;
     IoTMySQL iot(wifi.get_client(), DB_HOST_IP, DB_PORT, DB_USR, DB_PWD);
     iot.post_device();
     iot.post_distance(distance);
