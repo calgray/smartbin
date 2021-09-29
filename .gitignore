@@ -7,4 +7,6 @@ sdkconfig.*
 
 # IDE
 .vscode
+
+# Project
 /src/secrets.h
