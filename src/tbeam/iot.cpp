@@ -1,8 +1,8 @@
 
 #include "iot.h"
 
-IoTMySQL::IoTMySQL(Client& client, const IPAddress& host, int port, char* usr, char* pwd)
-: db((Client*)&client)
+IoTMySQL::IoTMySQL(Client& network, const IPAddress& host, int port, char* usr, char* pwd)
+: db(&network)
 {
     if(db.connect(host, port, usr, pwd))
     {

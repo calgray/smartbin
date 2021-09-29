@@ -7,7 +7,7 @@ class IoTMySQL
     MySQL_Connection db;
 
 public:
-    IoTMySQL(Client& client, const IPAddress& host, int port, char* usr, char* pwd);
+    IoTMySQL(Client& network, const IPAddress& host, int port, char* usr, char* pwd);
     ~IoTMySQL();
 
     void post_device() {}
