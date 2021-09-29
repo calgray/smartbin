@@ -15,9 +15,9 @@ public:
      * @brief Reads the UART device into TinyGPS
      * and returns the result.
      * 
-     * @return const TinyGPSPlus* 
+     * @return const TinyGPSPlus&
      */
-    const TinyGPSPlus& read();
+    TinyGPSPlus& read();
 
-    const TinyGPSPlus& get() const;
+    TinyGPSPlus& get();
 };

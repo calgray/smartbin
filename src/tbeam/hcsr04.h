@@ -5,6 +5,16 @@
 #include <vector>
 #include <queue>
 
+class HCSR04
+{
+public:
+    HCSR04() {}
+    ~HCSR04() {}
+
+    double get_distance_m() const { return 1.0; }
+};
+
+
 class HCSR04Buffered
 {
     circular_queue_mp<double> m_buffer;

@@ -15,8 +15,9 @@ Neo6M::~Neo6M()
     Serial2.end();
 }
 
-const TinyGPSPlus& Neo6M::read()
+TinyGPSPlus& Neo6M::read()
 {
+    // see https://meshtastic.discourse.group/t/t-beam-v1-1-gps-access/775/8
     while(Serial2.available() > 0)
     {
         if(_gps.encode(Serial2.read()))
@@ -27,7 +28,7 @@ const TinyGPSPlus& Neo6M::read()
     return _gps;
 }
 
-const TinyGPSPlus& Neo6M::get() const
+TinyGPSPlus& Neo6M::get()
 {
     return _gps;
 }

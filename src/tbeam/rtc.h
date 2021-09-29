@@ -1,4 +1,7 @@
 
+// ESP32 sleep persistant memory
+// RTC_DATA_ATTR double values[5];
+
 class RTC
 {
     RTC();

@@ -9,4 +9,9 @@ class IoTMySQL
 public:
     IoTMySQL(Client& client, const IPAddress& host, int port, char* usr, char* pwd);
     ~IoTMySQL();
+
+    void post_device() {}
+    void post_distance(double distance) {}
+    void post_temperature() {}
+    void post_location(double lat, double lng) {}
 };

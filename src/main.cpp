@@ -26,32 +26,41 @@
 
 #include "tbeamv1.h"
 #include "secrets.h"
-#include "axp192.h"
-#include "iot.h"
-#include "neo6m.h"
-#include "esp32wifi.h"
-
-// ESP32 sleep persistant memory
-// RTC_DATA_ATTR double values[5];
+#include "tbeam/axp192.h"
+#include "tbeam/iot.h"
+#include "tbeam/neo6m.h"
+#include "tbeam/esp32wifi.h"
+#include "tbeam/trafficlight.h"
+#include "tbeam/hcsr04.h"
 
 void setup()
 {
     Serial.begin(115200); // USB Monitor
-    Axp192 axp();
-    
+    Axp192 axp;
+
     Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
+    Neo6M gps;
+
+    TrafficLight traffic;
+    HCSR04 ultrasonic;
+    double distance = ultrasonic.get_distance_m();
+    traffic.set_max_distance(2.0);
+    traffic.set_distance(distance);
+
     IoTMySQL iot(wifi.get_client(), DB_HOST_IP, DB_PORT, DB_USR, DB_PWD);
-    Neo6M gps();
+    iot.post_device();
+    iot.post_distance(distance);
+    iot.post_temperature();
+    iot.post_location(gps.get().location.lat(), gps.get().location.lng());
 }
 
-void loop() { sleep(1); }
+void loop()
+{
+    //sleep(1);
+    esp_deep_sleep(10000000);
+}
 
 #else
-
-int main(int argc, char** argv)
-{
-
-}
-
+int main(int argc, char** argv) { }
 #endif
 

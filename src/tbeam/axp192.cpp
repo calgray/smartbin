@@ -1,5 +1,5 @@
 
-#include "axp192.h"
+#include "tbeam/axp192.h"
 
 Axp192::Axp192()
 {
