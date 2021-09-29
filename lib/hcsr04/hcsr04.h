@@ -5,11 +5,11 @@
 #include <vector>
 #include <queue>
 
-class HCSR04
+class HCSR04Buffered
 {
     circular_queue_mp<double> m_buffer;
 public:
-    HCSR04(int size)
+    HCSR04Buffered(int size)
     : m_buffer(size)
     { }
 

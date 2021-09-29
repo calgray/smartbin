@@ -8,6 +8,5 @@ sdkconfig.*
 # IDE
 .vscode
 
-# env
-venv/
-virtualenv/
+# Project
+/src/secrets.h
