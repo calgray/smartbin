@@ -26,74 +26,54 @@
 
 #include "tbeamv1.h"
 #include "secrets.h"
-
-#include <hcsr04.h>
-#include <axp20x.h>
-#include <MySQL_Connection.h>
-#include <MySQL_Cursor.h>
-#include <TinyGPS++.h>
-#include <WiFi.h>
-
-// ESP32 sleep persistant memory
-// RTC_DATA_ATTR double values[5];
-
-AXP20X_Class axp;
-WiFiClient client;
-MySQL_Connection db((Client*)&client);
+#include "tbeam/axp192.h"
+#include "tbeam/iot.h"
+#include "tbeam/neo6m.h"
+#include "tbeam/esp32wifi.h"
+#include "tbeam/trafficlight.h"
+#include "tbeam/hcsr04.h"
 
 void setup()
 {
     Serial.begin(115200); // USB Monitor
+    Axp192 axp;
 
-    Wire.begin(SDA, SCL); // Power Module
-    axp.begin(Wire, AXP192_SLAVE_ADDRESS);
-    //axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON); // OLED
-    //axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON); // None
-    //axp.setPowerOutPut(AXP192_DCDC3, AXP202_ON); // 3.3V Pin, pin7, pin11
-    //axp.setPowerOutPut(AXP192_LDO2, AXP202_ON); // LoRa
-    axp.setPowerOutPut(AXP192_LDO3, AXP202_ON); // GPS
+    // MVP
+    TrafficLight traffic(RED, YELLOW, GREEN);
+    traffic.set_max_distance(0.5);
 
-
-    Serial2.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX); // GPS Module
-
-    // WiFi
-    WiFi.begin(WIFI_SSID, WIFI_PWD);
-    Serial.println("Connecting");
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    Serial.println();
-    Serial.print("Connected, IP address: ");
-    Serial.println(WiFi.localIP());
-
-    // MySQL
-    if (db.connect(host_ip, port, usr, pwd))
+    HCSR04 ultrasonic(TRIG, ECHO);
+    while(true)
     {
-        Serial.println("Connection success!");
-        auto cur_mem = std::auto_ptr<MySQL_Cursor>( new MySQL_Cursor(&db));
-        
-        cur_mem->execute("use smartbin");
-        constexpr char INSERT_DEVICE[] = "INSERT INTO devices VALUES (0, 'arduino-esp32', 1111)";
-        cur_mem->execute(INSERT_DEVICE);
+        long delay = ultrasonic.measure_distance();
+        double distance = ultrasonic.get_distance_m();
+        Serial.printf("distance: %f , pct: %f\n", distance, distance/0.5);
+        traffic.set_distance(distance);
+        delayMicroseconds(std::max(0l, 100000l - delay));
     }
-    else
-    {
-        Serial.println("Connection failed!");
-    }
-    db.close();
 
-    axp.setPowerOutPut(AXP192_LDO3, AXP202_OFF);
+    // IoT
+    Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
+    //Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
+    
+    Neo6M gps;
+    gps.read();
+    Serial.printf("lat: %f long %f", gps.get().location.lat(), gps.get().location.lng());
+
+    // IoTMySQL iot(wifi.get_client(), DB_HOST_IP, DB_PORT, DB_USR, DB_PWD);
+    // iot.post_device();
+    // iot.post_distance(distance);
+    // iot.post_temperature();
+    // iot.post_location(gps.get().location.lat(), gps.get().location.lng());
 }
 
-void loop() { sleep(1); }
+void loop()
+{
+    sleep(1);
+    //esp_deep_sleep(10000000);
+}
 
 #else
-
-int main(int argc, char** argv)
-{
-
-}
-
+int main(int argc, char** argv) { }
 #endif
 

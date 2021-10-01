@@ -7,4 +7,6 @@ class Axp192
 public:
     Axp192();
     ~Axp192();
+
+    AXP20X_Class& getimpl() { return _axp; }
 };
