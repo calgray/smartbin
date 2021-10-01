@@ -7,7 +7,15 @@
 
 Neo6M::Neo6M()
 {
-    Serial2.begin(115200, SERIAL_8N1, GPS_RX, GPS_TX); // GPS Module
+    Serial2.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX); // GPS Module
+
+    //reset GPS
+    // byte reset_message[]={0xB5, 0x62, 0x06, 0x09, 0x0D, 0x00, 0xFF, 0xFF, 
+    //                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 
+    //                     0x00, 0x00, 0x04, 0x1C, 0x9B
+    //                     };
+    // Serial2.write(reset_message, sizeof(reset_message));
+
 }
 
 Neo6M::~Neo6M()

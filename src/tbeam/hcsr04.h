@@ -7,11 +7,34 @@
 
 class HCSR04
 {
+    int _trig;
+    int _echo;
+    double _distance;
 public:
-    HCSR04() {}
+    HCSR04(const int trig, const int echo)
+    : _trig(trig)
+    , _echo(echo)
+    , _distance(0)
+    {
+        pinMode(_trig, OUTPUT);
+        pinMode(_echo, INPUT);
+    }
+
     ~HCSR04() {}
 
-    double get_distance_m() const { return 1.0; }
+    double get_distance_m() const { return _distance; }
+    
+    double measure_distance()
+    {
+        digitalWrite(_trig, LOW);
+        delayMicroseconds(2);
+        digitalWrite(_trig, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(_trig, LOW);
+        long dur = pulseIn(_echo, HIGH);
+        _distance = dur / 5820.0;
+        return dur;
+    }
 };
 
 

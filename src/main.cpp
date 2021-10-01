@@ -39,26 +39,38 @@ void setup()
     Axp192 axp;
 
     // MVP
-    TrafficLight traffic;
-    HCSR04 ultrasonic;
-    double distance = ultrasonic.get_distance_m();
-    traffic.set_max_distance(2.0);
-    traffic.set_distance(distance);
+    TrafficLight traffic(RED, YELLOW, GREEN);
+    traffic.set_max_distance(0.5);
+
+    HCSR04 ultrasonic(TRIG, ECHO);
+    while(true)
+    {
+        long delay = ultrasonic.measure_distance();
+        double distance = ultrasonic.get_distance_m();
+        Serial.printf("distance: %f , pct: %f\n", distance, distance/0.5);
+        traffic.set_distance(distance);
+        delayMicroseconds(std::max(0l, 100000l - delay));
+    }
 
     // IoT
     Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
+    //Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
+    
     Neo6M gps;
-    IoTMySQL iot(wifi.get_client(), DB_HOST_IP, DB_PORT, DB_USR, DB_PWD);
-    iot.post_device();
-    iot.post_distance(distance);
-    iot.post_temperature();
-    iot.post_location(gps.get().location.lat(), gps.get().location.lng());
+    gps.read();
+    Serial.printf("lat: %f long %f", gps.get().location.lat(), gps.get().location.lng());
+
+    // IoTMySQL iot(wifi.get_client(), DB_HOST_IP, DB_PORT, DB_USR, DB_PWD);
+    // iot.post_device();
+    // iot.post_distance(distance);
+    // iot.post_temperature();
+    // iot.post_location(gps.get().location.lat(), gps.get().location.lng());
 }
 
 void loop()
 {
-    //sleep(1);
-    esp_deep_sleep(10000000);
+    sleep(1);
+    //esp_deep_sleep(10000000);
 }
 
 #else
