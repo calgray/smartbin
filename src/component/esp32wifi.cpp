@@ -3,18 +3,23 @@
 #include <WiFi.h>
 #include "esp_wpa2.h"
 
-Esp32WiFi::Esp32WiFi(const char* ssid, const char* password)
+Esp32WiFi::Esp32WiFi(const char* ssid, const char* password, int timeout_s)
 {
     WiFi.begin(ssid, password);
     
     Serial.println("Connecting");
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
+    int retries = 0;
+    while (WiFi.status() != WL_CONNECTED && retries < timeout_s) {
+        retries++;
+        delay(1000);
         Serial.print(".");
     }
-    Serial.println();
-    Serial.print("Connected, IP address: ");
-    Serial.println(WiFi.localIP());
+    if(WiFi.status() == WL_CONNECTED)
+    {
+        Serial.println();
+        Serial.print("Connected, IP address: ");
+        Serial.println(WiFi.localIP());
+    }
 }
 
 Esp32WiFi::Esp32WiFi(const char* ssid, const char* id, const char* username, const char* password)
@@ -28,7 +33,7 @@ Esp32WiFi::Esp32WiFi(const char* ssid, const char* id, const char* username, con
     esp_wifi_sta_wpa2_ent_enable(&wifi_config);
     WiFi.begin(ssid);
 
-    Serial.println("Connecting");
+    Serial.print("Connecting");
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
@@ -41,6 +46,11 @@ Esp32WiFi::Esp32WiFi(const char* ssid, const char* id, const char* username, con
 Esp32WiFi::~Esp32WiFi()
 {
     WiFi.disconnect(true);
+}
+
+bool Esp32WiFi::is_connected() const
+{
+    return WiFi.status() == WL_CONNECTED;
 }
 
 Client& Esp32WiFi::get_client()

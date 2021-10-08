@@ -26,54 +26,99 @@
 
 #include "tbeamv1.h"
 #include "secrets.h"
-#include "tbeam/axp192.h"
-#include "tbeam/iot.h"
-#include "tbeam/neo6m.h"
-#include "tbeam/esp32wifi.h"
-#include "tbeam/trafficlight.h"
-#include "tbeam/hcsr04.h"
+#include "component/axp192.h"
+#include "component/iot.h"
+#include "component/neo6m.h"
+#include "component/esp32wifi.h"
+#include "component/trafficlight.h"
+#include "component/hcsr04.h"
+#include "component/mq2.h"
+#include "component/tmp36.h"
 
 void setup()
 {
     Serial.begin(115200); // USB Monitor
     Axp192 axp;
 
-    // MVP
+    constexpr int RED = 14;
+    constexpr int YELLOW = 13;
+    constexpr int GREEN = 2;
     TrafficLight traffic(RED, YELLOW, GREEN);
     traffic.set_max_distance(0.5);
 
+    constexpr int TRIG = 15;
+    constexpr int ECHO = 39;
     HCSR04 ultrasonic(TRIG, ECHO);
-    while(true)
+
+    constexpr int TMP = 36;
+    TMP36 thermo(TMP);
+
+    //constexpr int GASA0 = 4;
+    //MQ2 gas(GASA0);
+
+    constexpr int ONBOARD_LED = 4;
+    pinMode(ONBOARD_LED, OUTPUT);
+    digitalWrite(ONBOARD_LED, HIGH); // Turns onboard LED off
+    axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
+
+    Neo6M gps;
+    gps.read(1000);
+    Serial.printf("sat: %i, lat: %f, long %f\n",
+        gps.get().satellites.value(),
+        gps.get().location.lat(),
+        gps.get().location.lng());
+
+
+    double distance;
+    for(int i = 0; i < 5; i++)
     {
         long delay = ultrasonic.measure_distance();
-        double distance = ultrasonic.get_distance_m();
-        Serial.printf("distance: %f , pct: %f\n", distance, distance/0.5);
+        distance = ultrasonic.get_distance_m();
+        Serial.printf("dist: %f , pct: %f\n", distance, distance / 0.5);
         traffic.set_distance(distance);
         delayMicroseconds(std::max(0l, 100000l - delay));
     }
+    float temp = thermo.read();
+    Serial.printf("deg C: %f\n", temp);
 
     // IoT
+    // Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
     Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
-    //Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
-    
-    Neo6M gps;
-    gps.read();
-    Serial.printf("lat: %f long %f", gps.get().location.lat(), gps.get().location.lng());
-
-    // IoTMySQL iot(wifi.get_client(), DB_HOST_IP, DB_PORT, DB_USR, DB_PWD);
-    // iot.post_device();
-    // iot.post_distance(distance);
-    // iot.post_temperature();
-    // iot.post_location(gps.get().location.lat(), gps.get().location.lng());
+    if (!wifi.is_connected())
+    {
+        Serial.printf("failed to connected to wifi\n"); digitalWrite(4, LOW);
+    }
+    else
+    {
+        IoTMySQL iot(wifi.get_client(), DB_HOST, DB_PORT, DB_USR, DB_PWD);
+        if(!iot.is_connected())
+        {
+            Serial.printf("failed to connected to iot platform\n"); digitalWrite(4, LOW);
+        }
+        else
+        {
+            try
+            {
+                iot.insert_device();
+                iot.insert_distance(distance);
+                iot.insert_temperature(temp);
+                iot.update_location(gps.get().location.lat(), gps.get().location.lng());
+                digitalWrite(4, HIGH);
+            }
+            catch(std::exception& e)
+            {
+                Serial.println(e.what());
+                digitalWrite(4, LOW);
+            }
+        }
+    }
 }
 
 void loop()
 {
-    sleep(1);
-    //esp_deep_sleep(10000000);
+    sleep(5);
+    Serial.printf("sleeping for 300s...\n");
+    esp_deep_sleep(300000000);
 }
 
-#else
-int main(int argc, char** argv) { }
 #endif
-
