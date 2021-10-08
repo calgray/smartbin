@@ -20,9 +20,12 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "main.h"
+
 #ifdef ESP_ARDUINO
 
-#include <Arduino.h> // setup() and loop() forward declared here
+// setup() and loop() forward declared here
+#include <Arduino.h>
 
 #include "tbeamv1.h"
 #include "secrets.h"
@@ -35,82 +38,144 @@
 #include "component/mq2.h"
 #include "component/tmp36.h"
 
+RTC_DATA_ATTR double calibrationDistance = 0.0;
+
+bool read_io38()
+{
+    return digitalRead(38) == LOW;
+}
+
 void setup()
 {
     Serial.begin(115200); // USB Monitor
     Axp192 axp;
 
-    constexpr int RED = 14;
-    constexpr int YELLOW = 13;
-    constexpr int GREEN = 2;
-    TrafficLight traffic(RED, YELLOW, GREEN);
-    traffic.set_max_distance(0.5);
+    Neo6M gps;
 
     constexpr int TRIG = 15;
     constexpr int ECHO = 39;
     HCSR04 ultrasonic(TRIG, ECHO);
 
+    constexpr int RED = 14;
+    constexpr int YELLOW = 13;
+    constexpr int GREEN = 2;
+    TrafficLight traffic(RED, YELLOW, GREEN);
+
     constexpr int TMP = 36;
     TMP36 thermo(TMP);
 
     //constexpr int GASA0 = 4;
-    //MQ2 gas(GASA0);
+    //MQ2 gas(GASA0); // Sensor draws too much current for T-Beam
 
-    constexpr int ONBOARD_LED = 4;
+    constexpr int CALIBRATE = 38;
+    pinMode(CALIBRATE, INPUT);
+
+    constexpr int EXTERN_PWR = 0;
+    pinMode(EXTERN_PWR, OUTPUT);
+    
     pinMode(ONBOARD_LED, OUTPUT);
     digitalWrite(ONBOARD_LED, HIGH); // Turns onboard LED off
     axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
 
-    Neo6M gps;
+    // Calibration Mode
+    // Note: Local calibration only necessary for traffic light display 
+    if(read_io38())
+    {
+        // Will calibrate in 20 seconds
+        for(int i = 0; i < 200; i++)
+        {
+            long delay = ultrasonic.measure_distance();
+            double distance = ultrasonic.get_distance_m();
+            if(read_io38())
+            {
+                // can realtime demo distances with io38 here
+                // calibration will be set after 20 seconds regardless
+                traffic.set_max_distance(distance);
+            }
+            traffic.set_distance(distance);
+            Serial.printf("dist: %f , pct: %f\n", distance, traffic.get_percent());
+            delayMicroseconds(std::max(0l, 100000l - delay));
+        }
+
+        calibrationDistance = ultrasonic.get_distance_m();
+        traffic.set_max_distance(calibrationDistance);
+        Serial.printf("Recalibrated distance to %f\n", calibrationDistance);
+    }
+    else
+    {
+        if(calibrationDistance == 0.0)
+        {
+            Serial.printf("Calibration distance not set, traffic module defaulting to %f\n", traffic.get_max_distance());
+        }
+        else
+        {
+            traffic.set_max_distance(calibrationDistance);
+            Serial.printf("Calibrated distance is %f\n", calibrationDistance);
+        }
+    }
+
+    // Read Distance
+    double distance;
+    long delay = ultrasonic.measure_distance();
+    distance = ultrasonic.get_distance_m();
+    traffic.set_distance(distance);
+    Serial.printf("dist: %f , pct: %f\n", distance, traffic.get_percent());
+    delayMicroseconds(std::max(0l, 100000l - delay));
+
+
+    // Read Temperature
+    float temp = thermo.read();
+    Serial.printf("deg C: %f\n", temp);
+
+    // Read GPS
     gps.read(1000);
     Serial.printf("sat: %i, lat: %f, long %f\n",
         gps.get().satellites.value(),
         gps.get().location.lat(),
         gps.get().location.lng());
 
+    // Read Battery
+    axp.getimpl().debugCharging();
+    Serial.printf("batt voltage: %f\n", axp.getimpl().getBattVoltage());
+    Serial.printf("batt percentage: %i\n", axp.getimpl().getBattPercentage());
+    Serial.printf("batt discharge: %f\n", axp.getimpl().getBattDischargeCurrent());
 
-    double distance;
-    for(int i = 0; i < 5; i++)
+    // IoT Record
+    try
     {
-        long delay = ultrasonic.measure_distance();
-        distance = ultrasonic.get_distance_m();
-        Serial.printf("dist: %f , pct: %f\n", distance, distance / 0.5);
-        traffic.set_distance(distance);
-        delayMicroseconds(std::max(0l, 100000l - delay));
-    }
-    float temp = thermo.read();
-    Serial.printf("deg C: %f\n", temp);
-
-    // IoT
-    // Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
-    Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
-    if (!wifi.is_connected())
-    {
-        Serial.printf("failed to connected to wifi\n"); digitalWrite(4, LOW);
-    }
-    else
-    {
-        IoTMySQL iot(wifi.get_client(), DB_HOST, DB_PORT, DB_USR, DB_PWD);
-        if(!iot.is_connected())
+        // Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
+        Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
+        if (!wifi.is_connected())
         {
-            Serial.printf("failed to connected to iot platform\n"); digitalWrite(4, LOW);
+            Serial.printf("failed to connected to wifi\n");
+            enable_error_light(axp);
         }
         else
         {
-            try
+            IoTMySQL iot(wifi.get_client(), DB_HOST, DB_PORT, DB_USR, DB_PWD);
+            if(!iot.is_connected())
             {
-                iot.insert_device();
-                iot.insert_distance(distance);
-                iot.insert_temperature(temp);
-                iot.update_location(gps.get().location.lat(), gps.get().location.lng());
-                digitalWrite(4, HIGH);
+                Serial.printf("failed to connected to iot platform\n");
+                enable_error_light(axp);
             }
-            catch(std::exception& e)
+            else
             {
-                Serial.println(e.what());
-                digitalWrite(4, LOW);
+                iot.insert_record(
+                    distance,
+                    temp,
+                    axp.getimpl().getBattVoltage() / 1000.0f,
+                    gps.get().location.lat(),
+                    gps.get().location.lng()
+                );
+                Serial.println("Data record posted successfully");
+                disable_error_light(axp);
             }
         }
+    }
+    catch(std::exception& e)
+    {
+        Serial.println(e.what());
+        enable_error_light(axp);
     }
 }
 
@@ -119,6 +184,18 @@ void loop()
     sleep(5);
     Serial.printf("sleeping for 300s...\n");
     esp_deep_sleep(300000000);
+}
+
+void enable_error_light(Axp192& axp)
+{
+    axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_BLINK_1HZ);
+    digitalWrite(ONBOARD_LED, LOW); // LOW is on
+}
+
+void disable_error_light(Axp192& axp)
+{
+    axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
+    digitalWrite(ONBOARD_LED, HIGH); // HIGH is off
 }
 
 #endif

@@ -18,6 +18,8 @@ public:
     {
         pinMode(_trig, OUTPUT);
         pinMode(_echo, INPUT);
+        // the first reading is always zero 
+        measure_distance();
     }
 
     ~HCSR04() {}

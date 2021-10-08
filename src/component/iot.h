@@ -5,7 +5,7 @@
 
 class IoTMySQL
 {
-    std::promise<void> _dns_promise;
+    std::promise<IPAddress> _dns_promise;
     MySQL_Connection _db;
     MySQL_Cursor* _cursor;
 
@@ -16,7 +16,5 @@ public:
 
     bool is_connected() const;
     void insert_device();
-    void insert_distance(double distance);
-    void insert_temperature(float temp);
-    void update_location(double lat, double lng);
+    void insert_record(double distance, double temp, double battery, double lat, double lng);
 };
