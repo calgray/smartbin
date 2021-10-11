@@ -40,6 +40,15 @@
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
+constexpr int EXTERN_PWR = 21;
+constexpr int TRIG = 15;
+constexpr int ECHO = 39;
+constexpr int RED = 14;
+constexpr int YELLOW = 13;
+constexpr int GREEN = 2;
+constexpr int CALIBRATE = 38;
+constexpr int TMP = 36;
+
 bool read_io38()
 {
     return digitalRead(38) == LOW;
@@ -52,27 +61,24 @@ void setup()
 
     Neo6M gps;
 
-    constexpr int TRIG = 15;
-    constexpr int ECHO = 39;
+
     HCSR04 ultrasonic(TRIG, ECHO);
 
-    constexpr int RED = 14;
-    constexpr int YELLOW = 13;
-    constexpr int GREEN = 2;
+
     TrafficLight traffic(RED, YELLOW, GREEN);
 
-    constexpr int TMP = 36;
+
     TMP36 thermo(TMP);
 
-    //constexpr int GASA0 = 4;
-    //MQ2 gas(GASA0); // Sensor draws too much current for T-Beam
 
-    constexpr int CALIBRATE = 38;
     pinMode(CALIBRATE, INPUT);
 
-    constexpr int EXTERN_PWR = 0;
     pinMode(EXTERN_PWR, OUTPUT);
-    
+    digitalWrite(EXTERN_PWR, HIGH);
+    pinMode(ONBOARD_LED, OUTPUT);
+    digitalWrite(ONBOARD_LED, LOW);
+
+
     pinMode(ONBOARD_LED, OUTPUT);
     digitalWrite(ONBOARD_LED, HIGH); // Turns onboard LED off
     axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
@@ -181,6 +187,7 @@ void setup()
 
 void loop()
 {
+    digitalWrite(EXTERN_PWR, LOW);
     sleep(5);
     Serial.printf("sleeping for 300s...\n");
     esp_deep_sleep(300000000);
