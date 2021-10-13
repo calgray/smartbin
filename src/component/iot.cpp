@@ -62,7 +62,7 @@ void IoTMySQL::insert_device()
 void IoTMySQL::insert_record(double distance, double temp, double battery, double lat, double lng)
 {
     std::stringstream ss;
-    ss << "INSERT INTO distances (device_id, distance, temperature, battery, lat, lng)";
+    ss << "INSERT INTO records (device_id, distance, temperature, battery, lat, lng)";
     ss << " VALUES (1, " << distance << ", " << temp << ", " << battery << ", " << lat << ", " << lng << ");";
     if(!_cursor->execute(ss.str().c_str()))
     {
