@@ -4,6 +4,7 @@ class TrafficLight
     int _red;
     int _yellow;
     int _green;
+    double _distance = 0.0;
     double _maxDistance = 0.5;
 public:
     TrafficLight(const int red, const int yellow, const int green)
@@ -17,11 +18,26 @@ public:
     }
     ~TrafficLight() {}
 
-    void set_max_distance(double m) { _maxDistance = m; }
+
+    double get_distance() const { return _distance; }
+    double get_max_distance() const { return _maxDistance; }
+    double get_percent() const { return _distance / _maxDistance; }
+
+    void set_max_distance(double m)
+    {
+        _maxDistance = m;
+        update_lights();
+    }
     void set_distance(double distance)
     {
-        double percent = distance / _maxDistance;
+        _distance = distance;
+        update_lights();
+    }
 
+private:
+    void update_lights()
+    {
+        double percent = get_percent();
         if(percent < 0.33)
         {
             digitalWrite(_red, HIGH);

@@ -18,6 +18,8 @@ public:
     {
         pinMode(_trig, OUTPUT);
         pinMode(_echo, INPUT);
+        // the first reading is always zero 
+        measure_distance();
     }
 
     ~HCSR04() {}
@@ -31,7 +33,7 @@ public:
         digitalWrite(_trig, HIGH);
         delayMicroseconds(10);
         digitalWrite(_trig, LOW);
-        long dur = pulseIn(_echo, HIGH);
+        long dur = pulseIn(_echo, HIGH, 100000);
         _distance = dur / 5820.0;
         return dur;
     }

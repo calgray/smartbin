@@ -8,14 +8,6 @@
 Neo6M::Neo6M()
 {
     Serial2.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX); // GPS Module
-
-    //reset GPS
-    // byte reset_message[]={0xB5, 0x62, 0x06, 0x09, 0x0D, 0x00, 0xFF, 0xFF, 
-    //                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 
-    //                     0x00, 0x00, 0x04, 0x1C, 0x9B
-    //                     };
-    // Serial2.write(reset_message, sizeof(reset_message));
-
 }
 
 Neo6M::~Neo6M()
@@ -37,7 +29,30 @@ TinyGPSPlus& Neo6M::read()
     return _gps;
 }
 
+TinyGPSPlus& Neo6M::read(unsigned long ms)
+{
+    unsigned long start = millis();
+    do
+    {
+        while (Serial2.available())
+        {
+            _gps.encode(Serial2.read());
+        }
+    } while (millis() - start < ms);
+    return _gps;
+}
+
 TinyGPSPlus& Neo6M::get()
 {
     return _gps;
+}
+
+void Neo6M::reset()
+{
+    byte reset_message[]={
+        0xB5, 0x62, 0x06, 0x09, 0x0D, 0x00, 0xFF, 0xFF, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 
+        0x00, 0x00, 0x04, 0x1C, 0x9B
+    };
+    Serial2.write(reset_message, sizeof(reset_message));
 }
