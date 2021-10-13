@@ -58,16 +58,9 @@ void setup()
 {
     Serial.begin(115200); // USB Monitor
     Axp192 axp;
-
     Neo6M gps;
-
-
     HCSR04 ultrasonic(TRIG, ECHO);
-
-
     TrafficLight traffic(RED, YELLOW, GREEN);
-
-
     TMP36 thermo(TMP);
 
 
@@ -75,9 +68,9 @@ void setup()
 
     pinMode(EXTERN_PWR, OUTPUT);
     digitalWrite(EXTERN_PWR, HIGH);
+
     pinMode(ONBOARD_LED, OUTPUT);
     digitalWrite(ONBOARD_LED, LOW);
-
 
     pinMode(ONBOARD_LED, OUTPUT);
     digitalWrite(ONBOARD_LED, HIGH); // Turns onboard LED off
@@ -189,8 +182,8 @@ void loop()
 {
     digitalWrite(EXTERN_PWR, LOW);
     sleep(5);
-    Serial.printf("sleeping for 300s...\n");
-    esp_deep_sleep(300000000);
+    Serial.printf("sleeping for 10s...\n");
+    esp_deep_sleep(10000000);
 }
 
 void enable_error_light(Axp192& axp)
