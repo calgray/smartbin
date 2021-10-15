@@ -37,10 +37,11 @@
 #include "component/hcsr04.h"
 #include "component/mq2.h"
 #include "component/tmp36.h"
+#include "component/debuglight.h"
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
-constexpr int EXTERN_PWR = 21;
+constexpr int EXTERN_PWR = 0;
 constexpr int TRIG = 15;
 constexpr int ECHO = 39;
 constexpr int RED = 14;
@@ -60,21 +61,15 @@ void setup()
     Axp192 axp;
     Neo6M gps;
     HCSR04 ultrasonic(TRIG, ECHO);
-    TrafficLight traffic(RED, YELLOW, GREEN);
     TMP36 thermo(TMP);
+    TrafficLight traffic(RED, YELLOW, GREEN);
+    DebugLights debug(axp);
 
 
     pinMode(CALIBRATE, INPUT);
 
     pinMode(EXTERN_PWR, OUTPUT);
     digitalWrite(EXTERN_PWR, HIGH);
-
-    pinMode(ONBOARD_LED, OUTPUT);
-    digitalWrite(ONBOARD_LED, LOW);
-
-    pinMode(ONBOARD_LED, OUTPUT);
-    digitalWrite(ONBOARD_LED, HIGH); // Turns onboard LED off
-    axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
 
     // Calibration Mode
     // Note: Local calibration only necessary for traffic light display 
@@ -136,7 +131,6 @@ void setup()
     // Read Battery
     axp.getimpl().debugCharging();
     Serial.printf("batt voltage: %f\n", axp.getimpl().getBattVoltage());
-    Serial.printf("batt percentage: %i\n", axp.getimpl().getBattPercentage());
     Serial.printf("batt discharge: %f\n", axp.getimpl().getBattDischargeCurrent());
 
     // IoT Record
@@ -147,7 +141,7 @@ void setup()
         if (!wifi.is_connected())
         {
             Serial.printf("failed to connected to wifi\n");
-            enable_error_light(axp);
+            debug.enable_error();
         }
         else
         {
@@ -155,7 +149,7 @@ void setup()
             if(!iot.is_connected())
             {
                 Serial.printf("failed to connected to iot platform\n");
-                enable_error_light(axp);
+                debug.enable_error();
             }
             else
             {
@@ -167,14 +161,14 @@ void setup()
                     gps.get().location.lng()
                 );
                 Serial.println("Data record posted successfully");
-                disable_error_light(axp);
+                debug.disable_error();
             }
         }
     }
     catch(std::exception& e)
     {
         Serial.println(e.what());
-        enable_error_light(axp);
+        debug.enable_error();
     }
 }
 

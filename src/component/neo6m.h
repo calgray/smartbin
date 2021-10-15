@@ -1,3 +1,5 @@
+#pragma once
+
 #include <TinyGPS++.h>
 
 class Neo6M

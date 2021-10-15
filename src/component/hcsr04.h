@@ -1,4 +1,4 @@
-
+#pragma once
 
 #include <circular_queue/circular_queue_mp.h>
 

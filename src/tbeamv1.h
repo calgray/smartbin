@@ -1,3 +1,4 @@
+#pragma once
 
 // T-Beam PINS
 constexpr int GPS_TX = 34;
