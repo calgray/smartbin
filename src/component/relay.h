@@ -24,30 +24,19 @@
 
 #pragma once
 
-#include "tbeamv1.h"
-#include "component/axp192.h"
-
-class DebugLights
+class Relay
 {
-    Axp192 _axp;
-
+private:
+    int _relay_pin;
 public:
-    DebugLights(Axp192& axp)
-    : _axp(axp)
+    Relay(int relay_pin)
+    : _relay_pin(relay_pin)
     {
-        pinMode(ONBOARD_LED, OUTPUT);
-        disable_error();
+        pinMode(_relay_pin, OUTPUT);
+        digitalWrite(_relay_pin, HIGH);
     }
-
-    void enable_error()
+    ~Relay()
     {
-        _axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_BLINK_1HZ);
-        // digitalWrite(ONBOARD_LED, LOW); // LOW is on
-    }
-
-    void disable_error()
-    {
-        _axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
-        // digitalWrite(ONBOARD_LED, HIGH); // HIGH is off
+        digitalWrite(_relay_pin, LOW);
     }
 };

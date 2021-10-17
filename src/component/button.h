@@ -24,30 +24,23 @@
 
 #pragma once
 
-#include "tbeamv1.h"
-#include "component/axp192.h"
-
-class DebugLights
+class Button
 {
-    Axp192 _axp;
-
+    int _pin;
 public:
-    DebugLights(Axp192& axp)
-    : _axp(axp)
+    Button(int pin)
+    : _pin(pin)
     {
-        pinMode(ONBOARD_LED, OUTPUT);
-        disable_error();
+        pinMode(_pin, INPUT);
     }
 
-    void enable_error()
+    ~Button()
     {
-        _axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_BLINK_1HZ);
-        // digitalWrite(ONBOARD_LED, LOW); // LOW is on
+
     }
 
-    void disable_error()
+    bool is_down()
     {
-        _axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
-        // digitalWrite(ONBOARD_LED, HIGH); // HIGH is off
+        return digitalRead(_pin) == LOW;
     }
 };
