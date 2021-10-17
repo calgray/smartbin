@@ -34,11 +34,6 @@ public:
         pinMode(_pin, INPUT);
     }
 
-    ~Button()
-    {
-
-    }
-
     bool is_down()
     {
         return digitalRead(_pin) == LOW;

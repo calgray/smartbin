@@ -27,7 +27,6 @@
 // setup() and loop() forward declared here
 #include <Arduino.h>
 
-#include "tbeamv1.h"
 #include "secrets.h"
 #include "component/axp192.h"
 #include "component/iot.h"
@@ -40,6 +39,7 @@
 #include "component/tmp36.h"
 #include "component/button.h"
 #include "component/debuglight.h"
+#include "tbeamv1.h"
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
