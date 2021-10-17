@@ -41,7 +41,8 @@
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
-constexpr int EXTERN_PWR = 0;
+// 0 Causes reset failures
+constexpr int EXTERN_PWR = 4;
 constexpr int TRIG = 15;
 constexpr int ECHO = 39;
 constexpr int RED = 14;
