@@ -71,6 +71,7 @@ void setup()
 
     pinMode(EXTERN_PWR, OUTPUT);
     digitalWrite(EXTERN_PWR, HIGH);
+    sleep(1);
 
     // Calibration Mode
     // Note: Local calibration only necessary for traffic light display 
@@ -88,7 +89,7 @@ void setup()
                 traffic.set_max_distance(distance);
             }
             traffic.set_distance(distance);
-            Serial.printf("dist: %f , pct: %f\n", distance, traffic.get_percent());
+            Serial.printf("dist: %f, pct: %f\n", distance, traffic.get_percent());
             delayMicroseconds(std::max(0l, 100000l - delay));
         }
 
@@ -123,7 +124,7 @@ void setup()
     Serial.printf("deg C: %f\n", temp);
 
     // Read GPS
-    gps.read(1000);
+    gps.read(10000);
     Serial.printf("sat: %i, lat: %f, long %f\n",
         gps.get().satellites.value(),
         gps.get().location.lat(),
@@ -176,7 +177,6 @@ void setup()
 void loop()
 {
     digitalWrite(EXTERN_PWR, LOW);
-    sleep(5);
     Serial.printf("sleeping for 10s...\n");
     esp_deep_sleep(10000000);
 }

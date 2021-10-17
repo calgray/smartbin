@@ -22,7 +22,7 @@ public:
 
     double get_distance() const { return _distance; }
     double get_max_distance() const { return _maxDistance; }
-    double get_percent() const { return _distance / _maxDistance; }
+    double get_percent() const { return 100.0 * _distance / _maxDistance; }
 
     void set_max_distance(double m)
     {
