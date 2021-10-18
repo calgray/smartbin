@@ -1,3 +1,4 @@
+#pragma once
 
 #include <axp20x.h>
 
