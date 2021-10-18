@@ -23,7 +23,7 @@
  */
 
 #include "neo6m.h"
-#include "tbeamv1.h"
+#include "board/tbeamv1.h"
 #include <HardwareSerial.h>
 #include <TinyGPS++.h>
 

@@ -63,13 +63,13 @@ private:
     void update_lights()
     {
         double percent = get_percent();
-        if(percent < 0.33)
+        if(percent < 33.3)
         {
             digitalWrite(_red, HIGH);
             digitalWrite(_yellow, LOW);
             digitalWrite(_green, LOW);
         }
-        else if(percent < 0.66)
+        else if(percent < 66.6)
         {
             digitalWrite(_red, LOW);
             digitalWrite(_yellow, HIGH);

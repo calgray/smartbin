@@ -39,19 +39,19 @@
 #include "component/tmp36.h"
 #include "component/button.h"
 #include "component/debuglight.h"
-#include "tbeamv1.h"
+#include "board/tbeamv1.h"
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
 // 0 Causes reset failures
 constexpr int EXTERN_PWR = 4;
 constexpr int TRIG = 15;
-constexpr int ECHO = 39;
+constexpr int ECHO = 39; // VN
 constexpr int RED = 14;
 constexpr int YELLOW = 13;
 constexpr int GREEN = 2;
 constexpr int CALIBRATE = 38;
-constexpr int TMP = 36;
+constexpr int TMP = 36; // VP
 
 
 void setup()

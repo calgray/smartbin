@@ -24,8 +24,8 @@
 
 #pragma once
 
-#include "tbeamv1.h"
 #include "component/axp192.h"
+#include "board/tbeamv1.h"
 
 class DebugLights
 {
