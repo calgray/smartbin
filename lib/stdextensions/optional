@@ -1,0 +1,28 @@
+#pragma once
+
+namespace std
+{
+    template<typename T>
+    class optional {
+    private:
+        T _val{};
+        bool _is_set = false;
+    public:
+        optional() : _is_set(false) {}
+        optional(const T& val)
+        : _val(val), _is_set(true) {}
+
+        bool has_value() { return _is_set; }
+        explicit operator bool() const { return _is_set; }
+
+        T value() const { return _val; }
+
+        void reset() { _is_set = false; }
+
+        optional operator=(const T& val) {
+            _val = val;
+            _is_set = true;
+            return *this;
+        }
+    };
+}

@@ -40,6 +40,7 @@
 #include "component/button.h"
 #include "component/debuglight.h"
 #include "board/tbeamv1.h"
+#include "streamextensions.h"
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
@@ -53,12 +54,11 @@ constexpr int GREEN = 2;
 constexpr int CALIBRATE = 38;
 constexpr int TMP = 36; // VP
 
-
 void setup()
 {
     Serial.begin(115200); // USB Monitor
     Axp192 axp;
-    Neo6M gps;
+    Neo6M gps(Serial2);
     HCSR04 ultrasonic(TRIG, ECHO);
     TMP36 thermo(TMP);
     TrafficLight traffic(RED, YELLOW, GREEN);
@@ -75,19 +75,22 @@ void setup()
         for(int i = 0; i < 200; i++)
         {
             long delay = ultrasonic.measure_distance();
-            double distance = ultrasonic.get_distance_m();
+            std::optional<double> distance = ultrasonic.get_distance_m();
             if(calibrate.is_down())
             {
                 // can realtime demo distances with io38 here
                 // calibration will be set after 20 seconds regardless
-                traffic.set_max_distance(distance);
+                if(distance.has_value())
+                {
+                    traffic.set_max_distance(distance.value());
+                }
             }
-            traffic.set_distance(distance);
-            Serial.printf("dist: %f, pct: %f\n", distance, traffic.get_percent());
+            traffic.set_distance(distance.value());
+            Serial << "dist: " << distance << ", pct: " << traffic.get_percent() << "\n";
             delayMicroseconds(std::max(0l, 100000l - delay));
         }
 
-        calibrationDistance = ultrasonic.get_distance_m();
+        calibrationDistance = ultrasonic.get_distance_m().value();
         traffic.set_max_distance(calibrationDistance);
         Serial.printf("Recalibrated distance to %f\n", calibrationDistance);
     }
@@ -105,11 +108,16 @@ void setup()
     }
 
     // Read Distance
-    double distance;
+    std::optional<double> distance;
     long delay = ultrasonic.measure_distance();
     distance = ultrasonic.get_distance_m();
-    traffic.set_distance(distance);
-    Serial.printf("dist: %f , pct: %f\n", distance, traffic.get_percent());
+    
+    if(distance.has_value())
+    {
+        traffic.set_distance(distance.value());
+    }
+
+    Serial << "dist: " << distance << ", pct: " << traffic.get_percent() << "\n";
     delayMicroseconds(std::max(0l, 100000l - delay));
 
 
@@ -152,7 +160,7 @@ void setup()
                 iot.insert_record(
                     distance,
                     temp,
-                    axp.getimpl().getBattVoltage() / 1000.0f,
+                    axp.get_battery_voltage(),
                     gps.get().location.lat(),
                     gps.get().location.lng()
                 );

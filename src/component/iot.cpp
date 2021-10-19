@@ -85,7 +85,12 @@ void IoTMySQL::register_device()
     }
 }
 
-void IoTMySQL::insert_record(double distance, double temp, double battery, double lat, double lng)
+void IoTMySQL::insert_record(
+    std::optional<double> distance,
+    std::optional<double> temp,
+    std::optional<double> battery,
+    std::optional<double> lat,
+    std::optional<double> lng)
 {
     std::stringstream ss;
     ss << "INSERT INTO records (device_id, distance, temperature, battery, lat, lng)";

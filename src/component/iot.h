@@ -22,10 +22,13 @@
  * SOFTWARE.
  */
 
+#include "streamextensions.h"
+
 #include <MySQL_Connection.h>
 #include <MySQL_Cursor.h>
 #include <WiFi.h>
 #include <future>
+#include <optional>
 
 class IoTMySQL
 {
@@ -40,5 +43,10 @@ public:
 
     bool is_connected() const;
     void register_device();
-    void insert_record(double distance, double temp, double battery, double lat, double lng);
+    void insert_record(
+        std::optional<double> distance,
+        std::optional<double> temp,
+        std::optional<double> battery,
+        std::optional<double> lat,
+        std::optional<double> lng);
 };

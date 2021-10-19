@@ -25,16 +25,20 @@
 #pragma once
 
 #include <TinyGPS++.h>
+#include <optional>
+
+class HardwareSerial;
 
 class Neo6M
 {
+    HardwareSerial& _serial;
     TinyGPSPlus _gps;
 public:
     /**
      * @brief Construct a new Neo-6M object
      * AXP192_LDO3 must be enabled if axp not provided
      */
-    Neo6M();
+    Neo6M(HardwareSerial& serial);
     ~Neo6M();
 
     /**
@@ -55,6 +59,25 @@ public:
     TinyGPSPlus& read(unsigned long ms);
 
     TinyGPSPlus& get();
+
+    std::optional<double> get_lat()
+    {
+        std::optional<double> lat;
+        if(_gps.location.isValid())
+        {
+            lat = _gps.location.lat();
+        }
+        return lat;
+    }
+    std::optional<double> get_long()
+    {
+        std::optional<double> lng;
+        if(_gps.location.isValid())
+        {
+            lng = _gps.location.lng();
+        }
+        return lng;
+    }
 
     void reset();
 };
