@@ -24,19 +24,19 @@
 
 #pragma once
 
-class Relay
+class ScopedSwitch
 {
 private:
-    int _relay_pin;
+    int _pin;
 public:
-    Relay(int relay_pin)
-    : _relay_pin(relay_pin)
+    ScopedSwitch(int pin)
+    : _pin(pin)
     {
-        pinMode(_relay_pin, OUTPUT);
-        digitalWrite(_relay_pin, HIGH);
+        pinMode(_pin, OUTPUT);
+        digitalWrite(_pin, HIGH);
     }
-    ~Relay()
+    ~ScopedSwitch()
     {
-        digitalWrite(_relay_pin, LOW);
+        digitalWrite(_pin, LOW);
     }
 };

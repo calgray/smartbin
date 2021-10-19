@@ -69,7 +69,7 @@ public:
         }
         return lat;
     }
-    std::optional<double> get_long()
+    std::optional<double> get_lng()
     {
         std::optional<double> lng;
         if(_gps.location.isValid())

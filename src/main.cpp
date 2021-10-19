@@ -35,7 +35,7 @@
 #include "component/trafficlight.h"
 #include "component/hcsr04.h"
 #include "component/mq2.h"
-#include "component/relay.h"
+#include "component/scopedswitch.h"
 #include "component/tmp36.h"
 #include "component/button.h"
 #include "component/debuglight.h"
@@ -44,7 +44,6 @@
 
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
-// 0 Causes reset failures
 constexpr int EXTERN_PWR = 4;
 constexpr int TRIG = 15;
 constexpr int ECHO = 39; // VN
@@ -63,7 +62,7 @@ void setup()
     TMP36 thermo(TMP);
     TrafficLight traffic(RED, YELLOW, GREEN);
     DebugLights debug(axp);
-    Relay relay(EXTERN_PWR);
+    ScopedSwitch scoped_switch(EXTERN_PWR);
     Button calibrate(CALIBRATE);
     sleep(1);
 
@@ -155,8 +154,8 @@ void setup()
             distance,
             temp,
             axp.get_battery_voltage(),
-            gps.get().location.lat(),
-            gps.get().location.lng()
+            gps.get_lat(),
+            gps.get_lng()
         );
         Serial.println("Data record posted successfully");
         debug.disable_error();
