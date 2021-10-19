@@ -2,6 +2,10 @@
 
 namespace std
 {
+    /**
+     * This is a C++11 compliant implementation of the C++17 optional
+     * defined at https://en.cppreference.com/w/cpp/utility/optional
+     */
     template<typename T>
     class optional {
     private:

@@ -107,67 +107,59 @@ void setup()
         }
     }
 
-    // Read Distance
-    std::optional<double> distance;
-    long delay = ultrasonic.measure_distance();
-    distance = ultrasonic.get_distance_m();
-    
-    if(distance.has_value())
-    {
-        traffic.set_distance(distance.value());
-    }
-
-    Serial << "dist: " << distance << ", pct: " << traffic.get_percent() << "\n";
-    delayMicroseconds(std::max(0l, 100000l - delay));
-
-
-    // Read Temperature
-    float temp = thermo.read();
-    Serial.printf("deg C: %f\n", temp);
-
-    // Read GPS
-    gps.read(10000);
-    Serial.printf("sat: %i, lat: %f, long %f\n",
-        gps.get().satellites.value(),
-        gps.get().location.lat(),
-        gps.get().location.lng());
-
-    // Read Battery
-    axp.getimpl().debugCharging();
-    Serial.printf("batt voltage: %f\n", axp.getimpl().getBattVoltage());
-    Serial.printf("batt discharge: %f\n", axp.getimpl().getBattDischargeCurrent());
-
-    // IoT Record
     try
     {
-        // Esp32WiFi wifi(WIFI_SSID, EAP_ID, EAP_USR, EAP_PWD);
+        // Read Distance
+        std::optional<double> distance;
+        long delay = ultrasonic.measure_distance();
+        distance = ultrasonic.get_distance_m();
+        
+        if(distance.has_value())
+        {
+            traffic.set_distance(distance.value());
+        }
+
+        Serial << "dist: " << distance << ", pct: " << traffic.get_percent() << "\n";
+        delayMicroseconds(std::max(0l, 100000l - delay));
+
+        // Read Temperature
+        float temp = thermo.read();
+        Serial.printf("deg C: %f\n", temp);
+
+        // Read GPS
+        gps.read(10000);
+        Serial.printf("sat: %i, lat: %f, long %f\n",
+            gps.get().satellites.value(),
+            gps.get().location.lat(),
+            gps.get().location.lng());
+
+        // Read Battery
+        axp.getimpl().debugCharging();
+        Serial.printf("batt voltage: %f\n", axp.getimpl().getBattVoltage());
+        Serial.printf("batt discharge: %f\n", axp.getimpl().getBattDischargeCurrent());
+
+        // Network Connect
         Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
         if (!wifi.is_connected())
         {
-            Serial.printf("failed to connected to wifi\n");
-            debug.enable_error();
+            throw std::runtime_error("failed to connected to wifi\n");
         }
-        else
+
+        // IoT Record
+        IoTMySQL iot(wifi.get_client(), DB_HOST, DB_PORT, DB_USR, DB_PWD);
+        if(!iot.is_connected())
         {
-            IoTMySQL iot(wifi.get_client(), DB_HOST, DB_PORT, DB_USR, DB_PWD);
-            if(!iot.is_connected())
-            {
-                Serial.printf("failed to connected to iot platform\n");
-                debug.enable_error();
-            }
-            else
-            {
-                iot.insert_record(
-                    distance,
-                    temp,
-                    axp.get_battery_voltage(),
-                    gps.get().location.lat(),
-                    gps.get().location.lng()
-                );
-                Serial.println("Data record posted successfully");
-                debug.disable_error();
-            }
+            throw std::runtime_error("failed to connected to iot platform\n");
         }
+        iot.insert_record(
+            distance,
+            temp,
+            axp.get_battery_voltage(),
+            gps.get().location.lat(),
+            gps.get().location.lng()
+        );
+        Serial.println("Data record posted successfully");
+        debug.disable_error();
     }
     catch(std::exception& e)
     {

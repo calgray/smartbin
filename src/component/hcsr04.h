@@ -57,7 +57,14 @@ public:
         delayMicroseconds(10);
         digitalWrite(_trig, LOW);
         long dur = pulseIn(_echo, HIGH, 100000);
-        _distance = dur / 5820.0;
+        if (dur < 1000000)
+        {
+            _distance = dur / 5820.0;
+        }
+        else
+        {
+            _distance.reset();
+        }
         return dur;
     }
 };
