@@ -24,19 +24,18 @@
 
 #pragma once
 
-class Relay
+class PushButton
 {
-private:
-    int _relay_pin;
+    int _pin;
 public:
-    Relay(int relay_pin)
-    : _relay_pin(relay_pin)
+    PushButton(int pin)
+    : _pin(pin)
     {
-        pinMode(_relay_pin, OUTPUT);
-        digitalWrite(_relay_pin, HIGH);
+        pinMode(_pin, INPUT);
     }
-    ~Relay()
+
+    bool is_down()
     {
-        digitalWrite(_relay_pin, LOW);
+        return digitalRead(_pin) == LOW;
     }
 };

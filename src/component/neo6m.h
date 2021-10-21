@@ -25,21 +25,25 @@
 #pragma once
 
 #include <TinyGPS++.h>
+#include <optional>
+
+class HardwareSerial;
 
 class Neo6M
 {
+    HardwareSerial& _serial;
     TinyGPSPlus _gps;
 public:
     /**
      * @brief Construct a new Neo-6M object
      * AXP192_LDO3 must be enabled if axp not provided
      */
-    Neo6M();
+    Neo6M(HardwareSerial& serial);
     ~Neo6M();
 
     /**
      * @brief Reads the UART Serial into TinyGPS
-     * until unavailable and returns the result.
+     * until unavailable and returns the result
      * 
      * @return const TinyGPSPlus&
      */
@@ -47,12 +51,28 @@ public:
 
     /**
      * @brief Reads the UART Serial for a given time window
-     * and returns the result.
+     * in milliseconds.
      * 
      * @param ms 
      * @return TinyGPSPlus& 
      */
     TinyGPSPlus& read(unsigned long ms);
+
+    std::optional<int> get_sat();
+
+    /**
+     * @brief Gets the gps latitude if it is available
+     * 
+     * @return std::optional<double> 
+     */
+    std::optional<double> get_lat();
+
+    /**
+     * @brief Gets the gps longitude if is is available
+     * 
+     * @return std::optional<double> 
+     */
+    std::optional<double> get_lng();
 
     TinyGPSPlus& get();
 

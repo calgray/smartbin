@@ -22,10 +22,13 @@
  * SOFTWARE.
  */
 
+#include <stream_extensions.h>
+
 #include <MySQL_Connection.h>
 #include <MySQL_Cursor.h>
 #include <WiFi.h>
 #include <future>
+#include <optional>
 
 class IoTMySQL
 {
@@ -37,8 +40,12 @@ public:
     IoTMySQL(Client& network, const char* host, int port, char* usr, char* pwd);
     static void dns_found(const char *name, const ip_addr_t *ipaddr, void *callback_arg);
     ~IoTMySQL();
-
     bool is_connected() const;
     void register_device();
-    void insert_record(double distance, double temp, double battery, double lat, double lng);
+    void insert_record(
+        std::optional<double> distance,
+        std::optional<double> temp,
+        std::optional<double> battery,
+        std::optional<double> lat,
+        std::optional<double> lng);
 };

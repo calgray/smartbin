@@ -26,17 +26,18 @@
 
 #include <vector>
 #include <queue>
+#include <optional>
 
 class HCSR04
 {
     int _trig;
     int _echo;
-    double _distance;
+    std::optional<double> _distance;
 public:
     HCSR04(const int trig, const int echo)
     : _trig(trig)
     , _echo(echo)
-    , _distance(0)
+    , _distance()
     {
         pinMode(_trig, OUTPUT);
         pinMode(_echo, INPUT);
@@ -46,7 +47,7 @@ public:
 
     ~HCSR04() {}
 
-    double get_distance_m() const { return _distance; }
+    std::optional<double> get_distance_m() const { return _distance.value(); }
     
     double measure_distance()
     {
@@ -56,7 +57,14 @@ public:
         delayMicroseconds(10);
         digitalWrite(_trig, LOW);
         long dur = pulseIn(_echo, HIGH, 100000);
-        _distance = dur / 5820.0;
+        if (dur < 1000000)
+        {
+            _distance = dur / 5820.0;
+        }
+        else
+        {
+            _distance.reset();
+        }
         return dur;
     }
 };

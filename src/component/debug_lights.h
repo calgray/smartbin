@@ -22,37 +22,32 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #include "component/axp192.h"
+#include "board/tbeamv1.h"
 
-Axp192::Axp192()
+class DebugLights
 {
-    Wire.begin(SDA, SCL);
-    _axp.begin(Wire, AXP192_SLAVE_ADDRESS);
-    //_axp.setPowerOutPut(AXP192_DCDC1, AXP202_OFF); // OLED
-    //_axp.setPowerOutPut(AXP192_DCDC2, AXP202_OFF); // None
-    //_axp.setPowerOutPut(AXP192_DCDC3, AXP202_OFF); // 3.3V Pin, pin7, pin11
-    _axp.setPowerOutPut(AXP192_LDO2, AXP202_OFF); // LoRa
-    _axp.setPowerOutPut(AXP192_LDO3, AXP202_ON); // GPS
-}
+    Axp192 _axp;
 
-Axp192::~Axp192()
-{
-    //_axp.setPowerOutPut(AXP192_DCDC1, AXP202_OFF); // OLED
-    //_axp.setPowerOutPut(AXP192_DCDC2, AXP202_OFF); // None
-    //_axp.setPowerOutPut(AXP192_DCDC3, AXP202_OFF); // 3.3V Pin, pin7, pin11
-    _axp.setPowerOutPut(AXP192_LDO2, AXP202_OFF); // LoRa
-    _axp.setPowerOutPut(AXP192_LDO3, AXP202_ON); // GPS
-}
-
-std::optional<double> Axp192::get_battery_voltage()
-{
-    std::optional<double> v;
-    double vmAh = _axp.getBattVoltage();
-    if (vmAh == AXP_NOT_INIT)
+public:
+    DebugLights(Axp192& axp)
+    : _axp(axp)
     {
-        v = vmAh / 1000.0f;
+        pinMode(ONBOARD_LED, OUTPUT);
+        disable_error();
     }
-    return v;
-}
 
-AXP20X_Class& Axp192::get_impl() { return _axp; }
+    void enable_error()
+    {
+        _axp.get_impl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_BLINK_1HZ);
+        // digitalWrite(ONBOARD_LED, LOW); // LOW is on
+    }
+
+    void disable_error()
+    {
+        _axp.get_impl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
+        // digitalWrite(ONBOARD_LED, HIGH); // HIGH is off
+    }
+};

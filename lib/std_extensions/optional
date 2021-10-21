@@ -22,37 +22,35 @@
  * SOFTWARE.
  */
 
-#include "component/axp192.h"
+#pragma once
 
-Axp192::Axp192()
+namespace std
 {
-    Wire.begin(SDA, SCL);
-    _axp.begin(Wire, AXP192_SLAVE_ADDRESS);
-    //_axp.setPowerOutPut(AXP192_DCDC1, AXP202_OFF); // OLED
-    //_axp.setPowerOutPut(AXP192_DCDC2, AXP202_OFF); // None
-    //_axp.setPowerOutPut(AXP192_DCDC3, AXP202_OFF); // 3.3V Pin, pin7, pin11
-    _axp.setPowerOutPut(AXP192_LDO2, AXP202_OFF); // LoRa
-    _axp.setPowerOutPut(AXP192_LDO3, AXP202_ON); // GPS
-}
+    /**
+     * This is a C++11 compliant implementation of the C++17 optional
+     * defined at https://en.cppreference.com/w/cpp/utility/optional
+     */
+    template<typename T>
+    class optional {
+    private:
+        T _val{};
+        bool _is_set = false;
+    public:
+        optional() : _is_set(false) {}
+        optional(const T& val)
+        : _val(val), _is_set(true) {}
 
-Axp192::~Axp192()
-{
-    //_axp.setPowerOutPut(AXP192_DCDC1, AXP202_OFF); // OLED
-    //_axp.setPowerOutPut(AXP192_DCDC2, AXP202_OFF); // None
-    //_axp.setPowerOutPut(AXP192_DCDC3, AXP202_OFF); // 3.3V Pin, pin7, pin11
-    _axp.setPowerOutPut(AXP192_LDO2, AXP202_OFF); // LoRa
-    _axp.setPowerOutPut(AXP192_LDO3, AXP202_ON); // GPS
-}
+        bool has_value() const { return _is_set; }
+        explicit operator bool() const { return _is_set; }
 
-std::optional<double> Axp192::get_battery_voltage()
-{
-    std::optional<double> v;
-    double vmAh = _axp.getBattVoltage();
-    if (vmAh == AXP_NOT_INIT)
-    {
-        v = vmAh / 1000.0f;
-    }
-    return v;
-}
+        T value() const { return _val; }
 
-AXP20X_Class& Axp192::get_impl() { return _axp; }
+        void reset() { _is_set = false; }
+
+        optional operator=(const T& val) {
+            _val = val;
+            _is_set = true;
+            return *this;
+        }
+    };
+}

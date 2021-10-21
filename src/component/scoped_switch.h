@@ -24,30 +24,19 @@
 
 #pragma once
 
-#include "component/axp192.h"
-#include "board/tbeamv1.h"
-
-class DebugLights
+class ScopedSwitch
 {
-    Axp192 _axp;
-
+private:
+    int _pin;
 public:
-    DebugLights(Axp192& axp)
-    : _axp(axp)
+    ScopedSwitch(int pin)
+    : _pin(pin)
     {
-        pinMode(ONBOARD_LED, OUTPUT);
-        disable_error();
+        pinMode(_pin, OUTPUT);
+        digitalWrite(_pin, HIGH);
     }
-
-    void enable_error()
+    ~ScopedSwitch()
     {
-        _axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_BLINK_1HZ);
-        // digitalWrite(ONBOARD_LED, LOW); // LOW is on
-    }
-
-    void disable_error()
-    {
-        _axp.getimpl().setChgLEDMode(axp_chgled_mode_t::AXP20X_LED_OFF);
-        // digitalWrite(ONBOARD_LED, HIGH); // HIGH is off
+        digitalWrite(_pin, LOW);
     }
 };

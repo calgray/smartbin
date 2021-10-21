@@ -27,23 +27,24 @@
 #include <HardwareSerial.h>
 #include <TinyGPS++.h>
 
-Neo6M::Neo6M()
+Neo6M::Neo6M(HardwareSerial& serial)
+: _serial(serial)
 {
-    Serial2.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX); // GPS Module
+    _serial.begin(9600, SERIAL_8N1, GPS_TX, GPS_RX); // GPS Module
 }
 
 Neo6M::~Neo6M()
 {
-    Serial2.end();
+    _serial.end();
 }
 
 TinyGPSPlus& Neo6M::read()
 {
     // see https://meshtastic.discourse.group/t/t-beam-v1-1-gps-access/775/8
     // see https://github.com/mikalhart/TinyGPSPlus/blob/master/examples/FullExample/FullExample.ino
-    while(Serial2.available() > 0)
+    while(_serial.available() > 0)
     {
-        if(_gps.encode(Serial2.read()))
+        if(_gps.encode(_serial.read()))
         {
             break;
         }
@@ -56,12 +57,42 @@ TinyGPSPlus& Neo6M::read(unsigned long ms)
     unsigned long start = millis();
     do
     {
-        while (Serial2.available())
+        while (_serial.available())
         {
-            _gps.encode(Serial2.read());
+            _gps.encode(_serial.read());
         }
     } while (millis() - start < ms);
     return _gps;
+}
+
+std::optional<int> Neo6M::get_sat()
+{
+    std::optional<int> sat;
+    if(_gps.satellites.isValid())
+    {
+        sat = _gps.satellites.value();
+    }
+    return sat;
+}
+
+std::optional<double> Neo6M::get_lat()
+{
+    std::optional<double> lat;
+    if(_gps.location.isValid())
+    {
+        lat = _gps.location.lat();
+    }
+    return lat;
+}
+
+std::optional<double> Neo6M::get_lng()
+{
+    std::optional<double> lng;
+    if(_gps.location.isValid())
+    {
+        lng = _gps.location.lng();
+    }
+    return lng;
 }
 
 TinyGPSPlus& Neo6M::get()
@@ -76,5 +107,5 @@ void Neo6M::reset()
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 
         0x00, 0x00, 0x04, 0x1C, 0x9B
     };
-    Serial2.write(reset_message, sizeof(reset_message));
+    _serial.write(reset_message, sizeof(reset_message));
 }
