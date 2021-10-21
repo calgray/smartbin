@@ -108,7 +108,7 @@ void setup()
         // Read Distance
         ultrasonic.measure_distance();
         std::optional<double> distance = ultrasonic.get_distance_m();
-        traffic.set_distance(distance.has_value() ? distance.value() : 2.0);
+        traffic.set_distance(distance.has_value() ? distance.value() : 0.0);
         Serial << "dist: " << distance << ", pct: " << traffic.get_percent() << "\n";
 
         // Read Temperature
