@@ -22,7 +22,6 @@
  * SOFTWARE.
  */
 
-// setup() and loop() forward declared here
 #include <Arduino.h>
 
 #include "secrets.h"
@@ -139,7 +138,7 @@ void setup()
         IoTMySQL iot(wifi.get_client(), DB_HOST, DB_PORT, DB_USR, DB_PWD);
         if(!iot.is_connected())
         {
-            throw std::runtime_error("failed to connected to iot platform\n");
+            throw std::runtime_error("failed to connected to iot platform");
         }
         iot.insert_record(distance, temp, voltage, lat, lng);
         Serial << "Data record posted successfully\n";
