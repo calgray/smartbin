@@ -24,18 +24,33 @@
 
 #pragma once
 
-class Button
-{
-    int _pin;
-public:
-    Button(int pin)
-    : _pin(pin)
-    {
-        pinMode(_pin, INPUT);
-    }
+#include <Print.h>
+#include <Printable.h>
+#include <sstream>
+#include <optional>
 
-    bool is_down()
-    {
-        return digitalRead(_pin) == LOW;
-    }
-};
+
+inline Print& operator<<(Print& obj, const char* arg)
+{
+    obj.print(arg);
+    return obj;
+}
+
+template<typename T>
+inline Print& operator<<(Print& obj, const T& arg)
+{
+    obj.print(arg);
+    return obj;
+}
+
+template<typename T>
+std::ostream& operator<<(std::ostream& os, const std::optional<T>& opt)
+{
+    return opt.has_value() ? os << opt.value() : os << "NULL";
+}
+
+template<typename T>
+Print& operator<<(Print& obj, const std::optional<T>& opt)
+{
+    return opt.has_value() ? obj << opt.value() : obj << "NULL";
+}

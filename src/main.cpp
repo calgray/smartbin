@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 
-#ifdef ESP_ARDUINO
-
 // setup() and loop() forward declared here
 #include <Arduino.h>
 
@@ -31,17 +29,17 @@
 #include "component/axp192.h"
 #include "component/iot.h"
 #include "component/neo6m.h"
-#include "component/esp32wifi.h"
-#include "component/trafficlight.h"
+#include "component/esp32_wifi.h"
 #include "component/hcsr04.h"
-#include "component/mq2.h"
-#include "component/scopedswitch.h"
 #include "component/tmp36.h"
-#include "component/button.h"
-#include "component/debuglight.h"
+#include "component/scoped_switch.h"
+#include "component/push_button.h"
+#include "component/traffic_lights.h"
+#include "component/debug_lights.h"
 #include "board/tbeamv1.h"
-#include "streamextensions.h"
+#include <stream_extensions.h>
 
+// Realtime clock persistent memory
 RTC_DATA_ATTR double calibrationDistance = 0.0;
 
 constexpr int EXTERN_PWR = 4;
@@ -60,25 +58,24 @@ void setup()
     Neo6M gps(Serial2);
     HCSR04 ultrasonic(TRIG, ECHO);
     TMP36 thermo(TMP);
-    TrafficLight traffic(RED, YELLOW, GREEN);
+    TrafficLights traffic(RED, YELLOW, GREEN);
     DebugLights debug(axp);
     ScopedSwitch scoped_switch(EXTERN_PWR);
-    Button calibrate(CALIBRATE);
+    PushButton calibrate(CALIBRATE);
     sleep(1);
 
-    // Calibration Mode
-    // Note: Local calibration only necessary for traffic light display 
     if(calibrate.is_down())
     {
-        // Will calibrate in 20 seconds
-        for(int i = 0; i < 200; i++)
+        // Calibration Mode
+        // Note: Local calibration only necessary for traffic light volume display 
+        // Calibration will be measured after 30 seconds
+        for(int i = 0; i < 300; i++)
         {
             long delay = ultrasonic.measure_distance();
             std::optional<double> distance = ultrasonic.get_distance_m();
             if(calibrate.is_down())
             {
-                // can realtime demo distances with io38 here
-                // calibration will be set after 20 seconds regardless
+                // can realtime test distances and lights with io38 here
                 if(distance.has_value())
                 {
                     traffic.set_max_distance(distance.value());
@@ -91,51 +88,45 @@ void setup()
 
         calibrationDistance = ultrasonic.get_distance_m().value();
         traffic.set_max_distance(calibrationDistance);
-        Serial.printf("Recalibrated distance to %f\n", calibrationDistance);
+        Serial << "Recalibrated distance to " << calibrationDistance << "\n";
     }
     else
     {
+        // Load Calibration
         if(calibrationDistance == 0.0)
         {
-            Serial.printf("Calibration distance not set, traffic module defaulting to %f\n", traffic.get_max_distance());
+            Serial << "Calibration distance not set, traffic module defaulting to " << traffic.get_max_distance() << "\n";
         }
         else
         {
             traffic.set_max_distance(calibrationDistance);
-            Serial.printf("Calibrated distance is %f\n", calibrationDistance);
+            Serial << "Calibrated distance is " << calibrationDistance << "\n";
         }
     }
 
     try
     {
         // Read Distance
-        std::optional<double> distance;
-        long delay = ultrasonic.measure_distance();
-        distance = ultrasonic.get_distance_m();
-        
-        if(distance.has_value())
-        {
-            traffic.set_distance(distance.value());
-        }
-
+        ultrasonic.measure_distance();
+        std::optional<double> distance = ultrasonic.get_distance_m();
+        traffic.set_distance(distance.has_value() ? distance.value() : 2.0);
         Serial << "dist: " << distance << ", pct: " << traffic.get_percent() << "\n";
-        delayMicroseconds(std::max(0l, 100000l - delay));
 
         // Read Temperature
         float temp = thermo.read();
-        Serial.printf("deg C: %f\n", temp);
+        Serial << "deg C: " << temp << "\n";
 
         // Read GPS
         gps.read(10000);
-        Serial.printf("sat: %i, lat: %f, long %f\n",
-            gps.get().satellites.value(),
-            gps.get().location.lat(),
-            gps.get().location.lng());
+        std::optional<double> lat = gps.get_lat();
+        std::optional<double> lng = gps.get_lng();
+        Serial << "sat: " << gps.get_sat() << ", lat: " << lat << ", lng: " << lng << "\n"; 
 
         // Read Battery
-        axp.getimpl().debugCharging();
-        Serial.printf("batt voltage: %f\n", axp.getimpl().getBattVoltage());
-        Serial.printf("batt discharge: %f\n", axp.getimpl().getBattDischargeCurrent());
+        std::optional<double> voltage = axp.get_battery_voltage();
+        axp.get_impl().debugCharging();
+        Serial << "batt voltage: " << voltage << "\n";
+        Serial << "batt discharge: " << axp.get_impl().getBattDischargeCurrent() << "\n";
 
         // Network Connect
         Esp32WiFi wifi(WIFI_SSID, WIFI_PWD);
@@ -150,27 +141,24 @@ void setup()
         {
             throw std::runtime_error("failed to connected to iot platform\n");
         }
-        iot.insert_record(
-            distance,
-            temp,
-            axp.get_battery_voltage(),
-            gps.get_lat(),
-            gps.get_lng()
-        );
-        Serial.println("Data record posted successfully");
+        iot.insert_record(distance, temp, voltage, lat, lng);
+        Serial << "Data record posted successfully\n";
         debug.disable_error();
     }
     catch(std::exception& e)
     {
-        Serial.println(e.what());
+        Serial << e.what() << "\n";
         debug.enable_error();
+        sleep(3);
     }
 }
 
 void loop()
 {
-    Serial.printf("sleeping for 10s...\n");
+    Serial << "sleeping for 10s...\n";
+#ifdef NOSLEEP
+    setup();
+#else
     esp_deep_sleep(10000000);
-}
-
 #endif
+}

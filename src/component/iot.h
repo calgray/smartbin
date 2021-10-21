@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "streamextensions.h"
+#include <stream_extensions.h>
 
 #include <MySQL_Connection.h>
 #include <MySQL_Cursor.h>
@@ -40,7 +40,6 @@ public:
     IoTMySQL(Client& network, const char* host, int port, char* usr, char* pwd);
     static void dns_found(const char *name, const ip_addr_t *ipaddr, void *callback_arg);
     ~IoTMySQL();
-
     bool is_connected() const;
     void register_device();
     void insert_record(

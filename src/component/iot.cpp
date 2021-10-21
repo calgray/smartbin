@@ -35,27 +35,29 @@ IoTMySQL::IoTMySQL(Client& network, const char* host, int port, char* usr, char*
     err_t err = dns_gethostbyname(host, &host_ip, &dns_found, this);
     if(err != 0 && err != -5)
     {
-        Serial.printf("error: %i\n", err);
+        Serial << "error: " << err << "\n";
     }
-    IPAddress host_ip2 = future.get(); // Blocks until future is joined
-    Serial.printf("Connecting to db at %i.%i.%i.%i:%i\n", host_ip2[0], host_ip2[1], host_ip2[2], host_ip2[3], port);
+    
+    // Block until dns future is joined
+    IPAddress host_ip2 = future.get();
+
+    Serial << "Connecting to db at " << host_ip2 << ":" << port << "\n";
 
     if(_db.connect(host_ip2, port, usr, pwd))
     {
-        Serial.println("Connection success!");
+        Serial << "Connection success!\n";
         _cursor = new MySQL_Cursor(&_db);
         _cursor->execute("USE smartbin;");
     }
     else
     {
-        Serial.println("Connection failed!");
-        throw std::exception();
+        Serial << "Connection failed!";
     }
 }
 
 void IoTMySQL::dns_found(const char *name, const ip_addr_t *ipaddr, void *callback_arg)
 {
-    Serial.printf("dns resolved\n");
+    Serial << "dns resolved\n";
     IoTMySQL* iot = (IoTMySQL*)callback_arg;
     IPAddress ip(ipaddr->u_addr.ip4.addr);
     iot->_dns_promise.set_value(ip);

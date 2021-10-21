@@ -65,6 +65,36 @@ TinyGPSPlus& Neo6M::read(unsigned long ms)
     return _gps;
 }
 
+std::optional<int> Neo6M::get_sat()
+{
+    std::optional<int> sat;
+    if(_gps.satellites.isValid())
+    {
+        sat = _gps.satellites.value();
+    }
+    return sat;
+}
+
+std::optional<double> Neo6M::get_lat()
+{
+    std::optional<double> lat;
+    if(_gps.location.isValid())
+    {
+        lat = _gps.location.lat();
+    }
+    return lat;
+}
+
+std::optional<double> Neo6M::get_lng()
+{
+    std::optional<double> lng;
+    if(_gps.location.isValid())
+    {
+        lng = _gps.location.lng();
+    }
+    return lng;
+}
+
 TinyGPSPlus& Neo6M::get()
 {
     return _gps;

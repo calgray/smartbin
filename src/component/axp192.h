@@ -9,17 +9,6 @@ class Axp192
 public:
     Axp192();
     ~Axp192();
-
-    AXP20X_Class& getimpl() { return _axp; }
-    std::optional<double> get_battery_voltage()
-    {
-        std::optional<double> v;
-        double vmAh = _axp.getBattVoltage();
-        if (vmAh == AXP_NOT_INIT)
-        {
-            v = vmAh / 1000.0f;
-        }
-        return v;
-    }
-
+    std::optional<double> get_battery_voltage();
+    AXP20X_Class& get_impl();
 };

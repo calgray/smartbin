@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <optional>
+
 class TMP36
 {
     int _tmp;
@@ -32,11 +34,6 @@ public:
     : _tmp(tmp)
     {
         pinMode(_tmp, INPUT);
-    }
-
-    ~TMP36()
-    {
-
     }
 
     /**

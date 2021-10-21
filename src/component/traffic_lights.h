@@ -24,7 +24,7 @@
 
 #pragma once
 
-class TrafficLight
+class TrafficLights
 {
     int _red;
     int _yellow;
@@ -32,7 +32,7 @@ class TrafficLight
     double _distance = 0.0;
     double _maxDistance = 0.5;
 public:
-    TrafficLight(const int red, const int yellow, const int green)
+    TrafficLights(const int red, const int yellow, const int green)
     : _red(red)
     , _yellow(yellow)
     , _green(green)
@@ -41,7 +41,7 @@ public:
         pinMode(_yellow, OUTPUT);
         pinMode(_green, OUTPUT);
     }
-    ~TrafficLight() {}
+    ~TrafficLights() {}
 
 
     double get_distance() const { return _distance; }

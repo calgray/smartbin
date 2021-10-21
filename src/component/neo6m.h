@@ -43,7 +43,7 @@ public:
 
     /**
      * @brief Reads the UART Serial into TinyGPS
-     * until unavailable and returns the result.
+     * until unavailable and returns the result
      * 
      * @return const TinyGPSPlus&
      */
@@ -51,33 +51,30 @@ public:
 
     /**
      * @brief Reads the UART Serial for a given time window
-     * and returns the result.
+     * in milliseconds.
      * 
      * @param ms 
      * @return TinyGPSPlus& 
      */
     TinyGPSPlus& read(unsigned long ms);
 
-    TinyGPSPlus& get();
+    std::optional<int> get_sat();
 
-    std::optional<double> get_lat()
-    {
-        std::optional<double> lat;
-        if(_gps.location.isValid())
-        {
-            lat = _gps.location.lat();
-        }
-        return lat;
-    }
-    std::optional<double> get_lng()
-    {
-        std::optional<double> lng;
-        if(_gps.location.isValid())
-        {
-            lng = _gps.location.lng();
-        }
-        return lng;
-    }
+    /**
+     * @brief Gets the gps latitude if it is available
+     * 
+     * @return std::optional<double> 
+     */
+    std::optional<double> get_lat();
+
+    /**
+     * @brief Gets the gps longitude if is is available
+     * 
+     * @return std::optional<double> 
+     */
+    std::optional<double> get_lng();
+
+    TinyGPSPlus& get();
 
     void reset();
 };

@@ -22,26 +22,26 @@
  * SOFTWARE.
  */
 
-#include "esp32wifi.h"
+#include "esp32_wifi.h"
 #include <WiFi.h>
-#include "esp_wpa2.h"
+#include <esp_wpa2.h>
+#include <esp_wifi.h>
+#include <stream_extensions.h>
 
 Esp32WiFi::Esp32WiFi(const char* ssid, const char* password, int timeout_s)
 {
     WiFi.begin(ssid, password);
     
-    Serial.println("Connecting");
+    Serial << "Connecting";
     int retries = 0;
     while (WiFi.status() != WL_CONNECTED && retries < timeout_s) {
         retries++;
         delay(1000);
-        Serial.print(".");
+        Serial << ".";
     }
     if(WiFi.status() == WL_CONNECTED)
     {
-        Serial.println();
-        Serial.print("Connected, IP address: ");
-        Serial.println(WiFi.localIP());
+        Serial << "\nConnected, IP address: " << WiFi.localIP() << "\n";
     }
 }
 
@@ -56,14 +56,12 @@ Esp32WiFi::Esp32WiFi(const char* ssid, const char* id, const char* username, con
     esp_wifi_sta_wpa2_ent_enable(&wifi_config);
     WiFi.begin(ssid);
 
-    Serial.print("Connecting");
+    Serial << "Connecting";
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.print(".");
+        Serial << ".";
     }
-    Serial.println();
-    Serial.print("Connected, IP address: ");
-    Serial.println(WiFi.localIP());
+    Serial << "\nConnected, IP address: " << WiFi.localIP() << "\n";
 }
 
 Esp32WiFi::~Esp32WiFi()
