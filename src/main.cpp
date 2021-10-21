@@ -154,10 +154,10 @@ void setup()
 
 void loop()
 {
-    Serial << "sleeping for 10s...\n";
 #ifdef NOSLEEP
     setup();
 #else
+    Serial << "sleeping for 10s...\n";
     esp_deep_sleep(10000000);
 #endif
 }
