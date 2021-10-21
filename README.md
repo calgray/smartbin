@@ -26,7 +26,3 @@ Copy the secrets.h.in file to secret.h in the same folder and enter the wifi and
 2. From the project repository directory run:
 
 `platformio run -e ttgo-tbeam -t upload -t monitor`
-
-## Continuous Integration
-
-Use github actions, read tests/README
