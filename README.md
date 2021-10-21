@@ -19,24 +19,14 @@ Copy the secrets.h.in file to secret.h in the same folder and enter the wifi and
 
 ## Build
 
-Install PlatformIO and/or PlatformIO VSCode integration.
+1. Install [PlatformIO](http://docs.platformio.org/page/core.html) and/or [PlatformIO IDE](https://platformio.org/platformio-ide) for VSCode:
 
 `pip install platformio`
 
-in the project directory run:
+2. From the project repository directory run:
 
-`platformio run -e ttgo-tbeam`
+`platformio run -e ttgo-tbeam -t upload -t monitor`
 
 ## Continuous Integration
 
 Use github actions, read tests/README
-
-### Tests
-
-Tests can be run using command:
-
-`platformio test -e ttgo-tbeam`
-
-Tests compatible with the native machine can be run using:
-
-`platformio test -e native`
