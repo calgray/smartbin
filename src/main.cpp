@@ -154,9 +154,7 @@ void setup()
 
 void loop()
 {
-#ifdef NOSLEEP
-    setup();
-#else
+#ifndef NOSLEEP
     Serial << "sleeping for 10s...\n";
     esp_deep_sleep(10000000);
 #endif
